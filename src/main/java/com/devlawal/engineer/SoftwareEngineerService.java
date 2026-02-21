@@ -7,9 +7,11 @@ import java.util.List;
 @Service
 public class SoftwareEngineerService {
     private final SoftwareEngineerRepository softwareEngineerRepository;
+    private final AiService aiService;
 
-    public SoftwareEngineerService(SoftwareEngineerRepository softwareEngineerRepository) {
+    public SoftwareEngineerService(SoftwareEngineerRepository softwareEngineerRepository, AiService aiService) {
         this.softwareEngineerRepository = softwareEngineerRepository;
+        this.aiService = aiService;
     }
 
     public List<SoftwareEngineer> getAllSoftwareEngineers() {
@@ -17,6 +19,12 @@ public class SoftwareEngineerService {
     }
 
     public void addSoftwareEngineer(SoftwareEngineer softwareEngineer) {
+        String message = """
+                Based on the provided tech stack %s by %s, please provide a well-structured and summarized learning path for the individual.
+                Ensure it is well formatted and written in clear, human-sounding language.
+                """.formatted(softwareEngineer.getStack(), softwareEngineer.getName());
+        String response = aiService.chat(message);
+        softwareEngineer.setRecommendedLearningPath(response);
         softwareEngineerRepository.save(softwareEngineer);
     }
 
